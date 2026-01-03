@@ -1,12 +1,13 @@
 ```md
-# Fees API
+
+Fees API
 
 A simple JSON API for calculating total auction fees for vehicle bids.  
 Supports Copart and IAAI with auction specific validation and fee logic.
 
 ---
 
-## Overview
+Overview
 
 The Fees API calculates the full cost of a vehicle purchase based on bid amount, auction rules, and fee tiers.  
 It returns a detailed breakdown including bidding fees, payment fees, and the final total.
