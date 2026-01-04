@@ -1,32 +1,16 @@
-```md
+# Copart & IAA Fees API
 
-Fees API
+## Overview
 
-A simple JSON API for calculating total auction fees for vehicle bids.  
-Supports Copart and IAAI with auction specific validation and fee logic.
+This API calculates total vehicle auction costs for Copart and IAAI bids.  
+It applies auction specific rules and tiered fee tables to return a complete fee breakdown, including bidding fees, payment fees, and the final total amount owed.
 
----
-
-Overview
-
-The Fees API calculates the full cost of a vehicle purchase based on bid amount, auction rules, and fee tiers.  
-It returns a detailed breakdown including bidding fees, payment fees, and the final total.
-
-Supported auctions:
-- Copart
-- IAAI
-
----
 
 ## Base URL
 
-```
 
-/api/fees
+https://www.auctionfeescalculator.com/api/fees
 
-```
-
----
 
 ## Authentication
 
@@ -150,46 +134,49 @@ Invalid combinations return `400 Bad Request`.
 ```
 
 ---
-
 ## Examples
 
-### Copart
+### Copart (JavaScript)
 
-```bash
-curl -X POST http://localhost:3000/api/fees \
-  -H "content-type: application/json" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -d '{
-    "bidAmount": 1500,
-    "auction": "copart",
-    "bidType": "online",
-    "bidPay": "secured",
-    "bidVehicle": "standard"
-  }'
+```js
+fetch("https://www.auctionfeescalculator.com/api/fees", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-api-key": "YOUR_API_KEY"
+  },
+  body: JSON.stringify({
+    bidAmount: 1500,
+    auction: "copart",
+    bidType: "online",
+    bidPay: "secured",
+    bidVehicle: "standard"
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data))
+````
+
+### IAAI (JavaScript)
+
+```js
+fetch("https://www.auctionfeescalculator.com/api/fees", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "x-api-key": "YOUR_API_KEY"
+  },
+  body: JSON.stringify({
+    bidAmount: 1500,
+    auction: "iaai",
+    bidType: "online",
+    bidPay: "standard",
+    bidVehicle: "licensed"
+  })
+})
+  .then(res => res.json())
+  .then(data => console.log(data))
 ```
-
-### IAAI
-
-```bash
-curl -X POST http://localhost:3000/api/fees \
-  -H "content-type: application/json" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -d '{
-    "bidAmount": 1500,
-    "auction": "iaai",
-    "bidType": "online",
-    "bidPay": "standard",
-    "bidVehicle": "licensed"
-  }'
-```
-
----
-
-## Best practices
-
-* Validate inputs on the client before calling the API
-* Never expose your API key in public frontend code
-* Treat the API as the single source of truth for fee totals
 
 ---
 
@@ -198,4 +185,5 @@ curl -X POST http://localhost:3000/api/fees \
 For questions or access requests, contact the API owner.
 
 ```
+bobthebaugd@gmail.com
 ```
