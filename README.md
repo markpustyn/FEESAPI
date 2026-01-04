@@ -1,4 +1,4 @@
-# Copart & IAA Fees API
+# Copart & IAAI Fees API
 
 ## Overview
 
@@ -62,9 +62,24 @@ x-api-key: YOUR_API_KEY
 | ---------- | ------ | -------- | ------------------------------------------ |
 | bidAmount  | number | yes      | Bid amount greater than 0                  |
 | auction    | string | yes      | `copart` or `iaai`                         |
-| bidType    | string | yes      | `online`, `kiosk`, `non-kiosk`             |
-| bidPay     | string | yes      | `secured`, `unsecured`, `standard`, `high` |
+| bidType    | string | yes      | `online`                                   |
+| bidPay     | string | yes      | `unsecured`(Copart) AND  `standard`(IAAI)  |
 | bidVehicle | string | yes      | Vehicle category                           |
+
+---
+
+## Vehicle Category
+
+`bidVehicle` must match the vehicle category supported by the selected auction.
+Use only valid category values for the chosen auction and vehicle type. Invalid or unsupported values will return a 400 Bad Request.
+
+### Copart
+
+* bidVehicle: Standard, Heavy, Crashed-Toys
+
+### IAAI
+
+* bidVehicle: licensed, non-licensed, recRides,heavy
 
 ---
 
@@ -72,15 +87,13 @@ x-api-key: YOUR_API_KEY
 
 ### Copart
 
-* bidType: online, kiosk, non-kiosk
-* bidPay: secured, unsecured, standard, high
-* bidVehicle: standard, heavy, crashedToys
+* bidType: **online**, kiosk, non-kiosk
+* bidPay: secured, **unsecured**, standard, high
 
 ### IAAI
 
 * bidType: online, kiosk
 * bidPay: standard, high
-* bidVehicle: licensed, non-licensed, recRides, heavy
 
 Invalid combinations return `400 Bad Request`.
 
@@ -149,7 +162,7 @@ fetch("https://www.auctionfeescalculator.com/api/fees", {
     bidAmount: 1500,
     auction: "copart",
     bidType: "online",
-    bidPay: "secured",
+    bidPay: "unsecured",
     bidVehicle: "standard"
   })
 })
@@ -182,7 +195,7 @@ fetch("https://www.auctionfeescalculator.com/api/fees", {
 
 ## Support
 
-For questions or access requests, contact the API owner.
+If any part of this documentation is unclear or you need help with integration, please contact us for clarification or support.
 
 ```
 bobthebaugd@gmail.com
