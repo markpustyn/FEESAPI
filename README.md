@@ -197,6 +197,3 @@ fetch("https://www.auctionfeescalculator.com/api/fees", {
 
 If any part of this documentation is unclear or you need help with integration, please contact us for clarification or support.
 
-```
-bobthebaugd@gmail.com
-```
