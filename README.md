@@ -34,8 +34,6 @@ x-api-key: YOUR_API_KEY
 {
   "bidAmount": 1200,
   "auction": "copart",
-  "bidType": "online",
-  "bidPay": "secured",
   "bidVehicle": "standard",
   "fromCity": "Reno",
   "fromState": "NV"
