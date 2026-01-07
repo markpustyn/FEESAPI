@@ -145,24 +145,6 @@ Returned when:
 { "error": "Invalid input" }
 ```
 
-**IAAI unsupported bidType**
-
-```json
-{
-  "error": "IAAI does not support bidType \"non-kiosk\". Use \"online\" or \"kiosk\".",
-  "bidType": "non-kiosk"
-}
-```
-
-**IAAI unsupported bidPay**
-
-```json
-{
-  "error": "IAAI only supports bidPay \"standard\" or \"high\".",
-  "bidPay": "secured"
-}
-```
-
 **IAAI unsupported bidVehicle**
 
 ```json
