@@ -60,21 +60,14 @@ x-api-key: YOUR_API_KEY
 
 ### Copart
 
-When `auction="copart"`, the API runs the Copart calculator using your inputs and these fixed fees:
+* bidType: **online**, kiosk, non-kiosk
+* bidPay: secured, **unsecured**, standard, high
 
-* `gateFee: 95`
-* `environmentalFee: 15`
-* `titleHandelingFee: 20`
+### IAAI
 
-### IAAI validation rules
+* bidType: **online**, kiosk
+* bidPay: **standard**, high
 
-When `auction="iaai"`, the API enforces:
-
-* `bidType` must be `online` or `kiosk`
-* `bidPay` must be `standard` or `high`
-* `bidVehicle` must be `licensed`, `non-licensed`, `recRides`, or `heavy`
-
-If a rule fails, the API returns `400` with a clear message plus the invalid field value.
 
 ### Towing
 
