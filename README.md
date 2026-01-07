@@ -1,50 +1,34 @@
-# Copart & IAAI Fees API
+# Auction Fees + Towing Quote API
 
-## Overview
+Calculates auction fees (Copart or IAAI) and inland towing estimate to the nearest port.
 
-This API calculates total vehicle auction costs for Copart and IAAI bids.  
-It applies auction specific rules and tiered fee tables to return a complete fee breakdown, including bidding fees, payment fees, and the final total amount owed.
+## Endpoint
 
-
-## Base URL
-
-
-https://www.auctionfeescalculator.com/api/fees
-
+**POST** `https://www.auctionfeescalculator.com/api/quote`
 
 ## Authentication
 
-All requests require an API key.
+Requires an API key.
 
 **Header**
-```
-
+```http
 x-api-key: YOUR_API_KEY
+````
 
-```
-
-Requests without a valid key return `401 Unauthorized`.
+If missing or invalid, returns `401 Unauthorized`.
 
 ---
 
 ## Request
 
-### Method
-```
-
-POST
-
-```
-
 ### Headers
-```
 
+```http
 Content-Type: application/json
 x-api-key: YOUR_API_KEY
+```
 
-````
-
-### Body
+### Body (JSON)
 
 ```json
 {
@@ -52,148 +36,184 @@ x-api-key: YOUR_API_KEY
   "auction": "copart",
   "bidType": "online",
   "bidPay": "secured",
-  "bidVehicle": "standard"
+  "bidVehicle": "standard",
+  "fromCity": "Reno",
+  "fromState": "NV"
 }
-````
+```
 
 ### Fields
 
-| Field      | Type   | Required | Description                                |
-| ---------- | ------ | -------- | ------------------------------------------ |
-| bidAmount  | number | yes      | Bid amount greater than 0                  |
-| auction    | string | yes      | `copart` or `iaai`                         |
-| bidType    | string | yes      | `online`                                   |
-| bidPay     | string | yes      | `unsecured`(Copart) AND  `standard`(IAAI)  |
-| bidVehicle | string | yes      | Vehicle category                           |
+| Field      | Type   | Required | Allowed values                                                             | Notes                                                                  |
+| ---------- | ------ | -------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| bidAmount  | number | yes      | `> 0`                                                                      | Must be finite and greater than 0                                      |
+| auction    | string | yes      | `copart`, `iaai`                                                           | Selects which fee calculator runs                                      |
+| bidType    | string | yes      | `online`, `kiosk`, `non-kiosk`                                             | **IAAI does not support `non-kiosk`**                                  |
+| bidPay     | string | yes      | `secured`, `unsecured`, `standard`, `high`                                 | **IAAI only supports `standard` or `high`**                            |
+| bidVehicle | string | yes      | `standard`, `heavy`, `crashedToys`, `licensed`, `non-licensed`, `recRides` | **IAAI only supports `licensed`, `non-licensed`, `recRides`, `heavy`** |
+| fromCity   | string | yes      | any non-empty string                                                       | Trimmed before use                                                     |
+| fromState  | string | yes      | 2 letter state code recommended                                            | Trimmed and uppercased before use                                      |
 
 ---
 
-## Vehicle Category
-
-`bidVehicle` must match the vehicle category supported by the selected auction.
-Use only valid category values for the chosen auction and vehicle type. Invalid or unsupported values will return a 400 Bad Request.
+## Behavior
 
 ### Copart
 
-* bidVehicle: Standard, Heavy, Crashed-Toys
+When `auction="copart"`, the API runs the Copart calculator using your inputs and these fixed fees:
 
-### IAAI
+* `gateFee: 95`
+* `environmentalFee: 15`
+* `titleHandelingFee: 20`
 
-* bidVehicle: licensed, non-licensed, recRides,heavy
+### IAAI validation rules
 
----
+When `auction="iaai"`, the API enforces:
 
-## Auction Rules
+* `bidType` must be `online` or `kiosk`
+* `bidPay` must be `standard` or `high`
+* `bidVehicle` must be `licensed`, `non-licensed`, `recRides`, or `heavy`
 
-### Copart
+If a rule fails, the API returns `400` with a clear message plus the invalid field value.
 
-* bidType: **online**, kiosk, non-kiosk
-* bidPay: secured, **unsecured**, standard, high
+### Towing
 
-### IAAI
+`towingFees` comes from `estimateInlandTowing({ fromCity, fromState })`.
 
-* bidType: online, kiosk
-* bidPay: standard, high
+If the towing function returns `"Undefined"`, the API returns:
 
-Invalid combinations return `400 Bad Request`.
+```json
+"towingFees": "Undefined"
+```
+
+Otherwise it returns the towing object directly.
+
+### Shipping
+
+`shippingFees` is currently a placeholder:
+
+```json
+"shippingFees": { "total": 0 }
+```
 
 ---
 
 ## Response
 
-### Success `200`
+### 200 OK
 
 ```json
 {
-  "bidAmount": 1200,
-  "result": {
-    "totalAmount": 1465,
-    "calculatedPaymentFee": 250,
-    "calculatedBiddingFee": 85
+ "bidAmount": 10400,
+ "auctionFees": {
+  "bidAmount": 10400,
+  "auctionFees": {
+   "auctionFee": 1290,
+   "totalAmount": 11690
   }
+ },
+ "towingFees": {
+  "departure": "Newburgh, NY",
+  "toPort": {
+   "city": "New York",
+   "state": "NY"
+  },
+  "towingTotal": 330
+ },
+ "shippingFees": {
+  "total": 0
+ }
 }
 ```
 
-### Fields
+**Notes**
 
-| Field                | Description            |
-| -------------------- | ---------------------- |
-| totalAmount          | Bid plus all fees      |
-| calculatedPaymentFee | Payment processing fee |
-| calculatedBiddingFee | Auction bidding fee    |
+* `towingFees` can be an object **or** the string `"Undefined"`.
 
 ---
 
 ## Errors
 
-### Invalid input `400`
-
-```json
-{ "error": "Invalid bidAmount" }
-```
-
-### Unsupported option `400`
-
-```json
-{
-  "error": "IAAI does not support bidType \"non-kiosk\". Use \"online\" or \"kiosk\"."
-}
-```
-
-### Unauthorized `401`
+### 401 Unauthorized
 
 ```json
 { "error": "Unauthorized" }
 ```
 
----
-## Examples
+### 400 Bad Request
 
-### Copart (JavaScript)
+**Invalid JSON**
 
-```js
-fetch("https://www.auctionfeescalculator.com/api/fees", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": "YOUR_API_KEY"
-  },
-  body: JSON.stringify({
-    bidAmount: 1500,
-    auction: "copart",
-    bidType: "online",
-    bidPay: "unsecured",
-    bidVehicle: "standard"
-  })
-})
-  .then(res => res.json())
-  .then(data => console.log(data))
-````
+```json
+{ "error": "Invalid JSON" }
+```
 
-### IAAI (JavaScript)
+**Invalid input**
+Returned when:
 
-```js
-fetch("https://www.auctionfeescalculator.com/api/fees", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json",
-    "x-api-key": "YOUR_API_KEY"
-  },
-  body: JSON.stringify({
-    bidAmount: 1500,
-    auction: "iaai",
-    bidType: "online",
-    bidPay: "standard",
-    bidVehicle: "licensed"
-  })
-})
-  .then(res => res.json())
-  .then(data => console.log(data))
+* `bidAmount` is not finite or `<= 0`
+* `fromCity` is missing or empty after trim
+* `fromState` is missing or empty after trim
+
+```json
+{ "error": "Invalid input" }
+```
+
+**IAAI unsupported bidType**
+
+```json
+{
+  "error": "IAAI does not support bidType \"non-kiosk\". Use \"online\" or \"kiosk\".",
+  "bidType": "non-kiosk"
+}
+```
+
+**IAAI unsupported bidPay**
+
+```json
+{
+  "error": "IAAI only supports bidPay \"standard\" or \"high\".",
+  "bidPay": "secured"
+}
+```
+
+**IAAI unsupported bidVehicle**
+
+```json
+{
+  "error": "IAAI does not support this bidVehicle.",
+  "bidVehicle": "standard"
+}
+```
+
+**Calculation failure**
+
+```json
+{
+  "error": "Quote calculation failed",
+  "details": "..."
+}
 ```
 
 ---
 
-## Support
+## Example JavaScript
 
-If any part of this documentation is unclear or you need help with integration, please contact us for clarification or support.
+```js
+await fetch("https://www.auctionfeescalculator.com/api/quote", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "x-api-key": process.env.CLIENT_API_KEY!,
+        },
+        body: JSON.stringify({
+            auction: "iaai",
+            bidAmount: 10400,
+            bidType: "online",
+            bidPay: "standard",
+            bidVehicle: "licensed",
+            fromCity: "Newburgh",
+            fromState: "NY",
+        }),
+```
 
