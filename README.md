@@ -48,8 +48,6 @@ x-api-key: YOUR_API_KEY
 | ---------- | ------ | -------- | -------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
 | bidAmount  | number | yes      | `> 0`                                                                      | Must be finite and greater than 0                                      |
 | auction    | string | yes      | `copart`, `iaai`                                                           | Selects which fee calculator runs                                      |
-| bidType    | string | yes      | `online`, `kiosk`, `non-kiosk`                                             | **IAAI does not support `non-kiosk`**                                  |
-| bidPay     | string | yes      | `secured`, `unsecured`, `standard`, `high`                                 | **IAAI only supports `standard` or `high`**                            |
 | bidVehicle | string | yes      | `standard`, `heavy`, `crashedToys`, `licensed`, `non-licensed`, `recRides` | **IAAI only supports `licensed`, `non-licensed`, `recRides`, `heavy`** |
 | fromCity   | string | yes      | any non-empty string                                                       | Trimmed before use                                                     |
 | fromState  | string | yes      | 2 letter state code recommended                                            | Trimmed and uppercased before use                                      |
@@ -60,14 +58,11 @@ x-api-key: YOUR_API_KEY
 
 ### Copart
 
-* bidType: **online**, kiosk, non-kiosk
-* bidPay: secured, **unsecured**, standard, high
+* bidVehicle: "standard" | "heavy" | "crashedToys"
 
 ### IAAI
 
-* bidType: **online**, kiosk
-* bidPay: **standard**, high
-
+* bidVehicle: "licensed" | "non-licensed" | "recRides" | "heavy"
 
 ### Towing
 
